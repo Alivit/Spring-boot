@@ -6,13 +6,13 @@ import java.util.List;
 
 public interface TagRepository {
 
-    void add(Tag tag);
+    int add(List<String> names, List<Double> prices, List<Integer> durations, String tag);
 
     List<Tag> getAll();
 
-    void update(Tag tag);
+    int update(List<String> names, List<Double> prices, List<Integer> durations, String tagName);
 
-    void remove(Tag tag);
+    int remove(Tag tag);
 
     Tag getById(Long id);
 

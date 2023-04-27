@@ -17,18 +17,29 @@ public class GiftCertificateService implements GiftCertificateRepository {
     private Session session;
 
     @Override
-    public void add(GiftCertificate certificate, Set<String> tagsSet) {
-        session = Hibernate.getSessionFactory();
+    public int add(GiftCertificate certificate, Set<String> tagsSet) {
+        try {
+            session = Hibernate.getSessionFactory();
 
+            session.beginTransaction();
+            session.saveOrUpdate(createCertificateWithTags(certificate, tagsSet));
+            session.getTransaction().commit();
+
+            session.close();
+        }catch (Exception e){
+            return 1;
+        }
+
+        return 0;
+    }
+
+    private GiftCertificate createCertificateWithTags(GiftCertificate certificate, Set<String> tagsSet){
         Set<Tag> tags = tagsSet.stream().
                 map(name -> new Tag(0,name,null)).
                 collect(Collectors.toSet());
         certificate.setTags(tags);
-        session.beginTransaction();
-        session.save(certificate);
-        session.getTransaction().commit();
 
-        session.close();
+        return certificate;
     }
 
     @Override
@@ -44,25 +55,37 @@ public class GiftCertificateService implements GiftCertificateRepository {
     }
 
     @Override
-    public void update(GiftCertificate certificate, Set<String> tagsSet) {
-        session = Hibernate.getSessionFactory();
+    public int update(GiftCertificate certificate, Set<String> tagsSet) {
+        try {
+            session = Hibernate.getSessionFactory();
 
-        session.beginTransaction();
-        session.update(certificate);
-        session.getTransaction().commit();
+            session.beginTransaction();
+            session.update(createCertificateWithTags(certificate, tagsSet));
+            session.getTransaction().commit();
 
-        session.close();
+            session.close();
+        }catch (Exception e){
+            return 1;
+        }
+
+        return 0;
     }
 
     @Override
-    public void remove(GiftCertificate certificate) {
-        session = Hibernate.getSessionFactory();
+    public int remove(GiftCertificate certificate) {
+        try {
+            session = Hibernate.getSessionFactory();
 
-        session.beginTransaction();
-        session.remove(certificate);
-        session.getTransaction().commit();
+            session.beginTransaction();
+            session.remove(certificate);
+            session.getTransaction().commit();
 
-        session.close();
+            session.close();
+        }catch (Exception e){
+            return 1;
+        }
+
+        return 0;
     }
 
     @Override
@@ -75,5 +98,17 @@ public class GiftCertificateService implements GiftCertificateRepository {
 
         session.close();
         return certificate;
+    }
+
+    @Override
+    public List<GiftCertificate> getByName(String name) {
+        session = Hibernate.getSessionFactory();
+
+        session.beginTransaction();
+        List<GiftCertificate> certificates = session.createQuery("FROM GiftCertificate WHERE name LIKE '%" + name + "%'").list();
+        session.getTransaction().commit();
+
+        session.close();
+        return certificates;
     }
 }

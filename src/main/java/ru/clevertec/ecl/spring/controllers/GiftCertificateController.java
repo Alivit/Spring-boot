@@ -8,9 +8,10 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+
 import ru.clevertec.ecl.spring.entities.GiftCertificate;
-import ru.clevertec.ecl.spring.entities.Tag;
 import ru.clevertec.ecl.spring.exception.AppError;
 import ru.clevertec.ecl.spring.services.GiftCertificateService;
 
@@ -48,12 +49,26 @@ public class GiftCertificateController {
     }
 
     @PostMapping("/certificates")
-    public void createCertificate(@RequestParam("tag") Set<String> tags, GiftCertificate certificate){
-        giftCertificateService.add(certificate, tags);
+    public ResponseEntity<?> createCertificate(@RequestParam("tag") Set<String> tags, GiftCertificate certificate){
+        if(giftCertificateService.add(certificate, tags) == 1){
+            return new ResponseEntity<>(new AppError(HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                    "Gift certificate with id " + certificate.getName() + " nor created"), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        return new ResponseEntity<>(certificate, HttpStatus.OK);
     }
 
+    @PutMapping("/certificates")
+    public ResponseEntity<?> updateCertificate(@RequestParam("tag") Set<String> tags, GiftCertificate certificate){
+        if(giftCertificateService.update(certificate, tags) == 1){
+            return new ResponseEntity<>(new AppError(HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                    "Gift certificate with id " + certificate.getName() + " nor updated"), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        return new ResponseEntity<>(certificate, HttpStatus.OK);
+    }
     @DeleteMapping("/certificates/{id}")
-    public ResponseEntity<?> deleteEmployee(@PathVariable Long id) {
+    public ResponseEntity<?> deleteCertificate(@PathVariable Long id) {
         GiftCertificate certificate = giftCertificateService.getById(id);
 
         if(certificate == null) {
@@ -61,7 +76,10 @@ public class GiftCertificateController {
                     "Gift certificate with id " + id + " nor found"), HttpStatus.NOT_FOUND);
         }
 
-        giftCertificateService.remove(certificate);
+        if(giftCertificateService.remove(certificate) == 1){
+            return new ResponseEntity<>(new AppError(HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                    "Gift certificate with id " + id + " nor deleted"), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
 
         return new ResponseEntity<>(certificate, HttpStatus.OK);
     }

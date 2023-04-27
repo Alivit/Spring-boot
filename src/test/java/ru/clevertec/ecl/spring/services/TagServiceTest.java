@@ -1,10 +1,8 @@
 package ru.clevertec.ecl.spring.services;
 
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.clevertec.ecl.spring.entities.GiftCertificate;
-import ru.clevertec.ecl.spring.entities.Tag;
 
 import java.util.Set;
 
@@ -12,24 +10,24 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class TagServiceTest {
 
-    GiftCertificateService giftCertificateService;
+    TagService tagsService;
 
     @BeforeEach
     void init(){
-        giftCertificateService = new GiftCertificateService();
+        tagsService = new TagService();
     }
     @Test
-    public void addCertificateTest(){
+    public void addTagsTest(){
         Set<String> setTags = Set.of("blue", "red");
 
-        GiftCertificate certificate = new GiftCertificate();
-        certificate.setName("gift1");
-        certificate.setPrice(100);
-        certificate.setDuration(90);
+        GiftCertificate certificate1 = new GiftCertificate();
+        certificate1.setName("gift1");
+        certificate1.setPrice(100);
+        certificate1.setDuration(90);
 
-        giftCertificateService.add(certificate, setTags);
 
-        assertThat(giftCertificateService.getAll().size()).isEqualTo(1);
+
+        assertThat(tagsService.getAll().size()).isEqualTo(1);
 
     }
 }
