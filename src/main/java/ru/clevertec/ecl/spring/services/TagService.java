@@ -13,11 +13,26 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+/**
+ * Класс сервис crud операций для работы с тэгами
+ */
 @Service
 public class TagService implements TagRepository {
 
+    /**
+     * Поле с классом хранящую сессию подключения к базе данных
+     */
     private Session session;
 
+    /**
+     * Метод созданный для добавления данных в таблицу tag
+     *
+     * @param names содержит список названий подарочных сертификатов
+     * @param prices содержит список цен подарочных сертификатов
+     * @param durations содержит список продолжительноти подарочных сертификатов
+     * @param tag содержит название тега
+     * @return 0 если всё прошло без ошибок, а 1 если возникла ошибка
+     */
     @Override
     public int add(List<String> names, List<Double> prices, List<Integer> durations, String tag) {
         try {
@@ -34,6 +49,15 @@ public class TagService implements TagRepository {
         return 0;
     }
 
+    /**
+     * Метод созданный для добавление списка сертификатов в объект класса тега
+     *
+     * @param names содержит список названий подарочных сертификатов
+     * @param prices содержит список цен подарочных сертификатов
+     * @param durations содержит список продолжительноти подарочных сертификатов
+     * @param tagName содержит название тега
+     * @return объект тега со списком сертификатов
+     */
     private Tag createTagWithCertificates(List<String> names, List<Double> prices,
                                           List<Integer> durations, String tagName){
         Tag tag = new Tag();
@@ -50,6 +74,11 @@ public class TagService implements TagRepository {
         return tag;
     }
 
+    /**
+     * Метод чтения данных из таблицы tag
+     *
+     * @return лист с полученными данными из базы данных
+     */
     @Override
     public List<Tag> getAll() {
         session = Hibernate.getSessionFactory();
@@ -62,6 +91,15 @@ public class TagService implements TagRepository {
         return tags;
     }
 
+    /**
+     * Метод созданный для обновления данных в таблице tag
+     *
+     * @param names содержит список названий подарочных сертификатов
+     * @param prices содержит список цен подарочных сертификатов
+     * @param durations содержит список продолжительноти подарочных сертификатов
+     * @param tag содержит название тега
+     * @return 0 если всё прошло без ошибок, а 1 если возникла ошибка
+     */
     @Override
     public int update(List<String> names, List<Double> prices,
                       List<Integer> durations, String tag) {
@@ -79,6 +117,12 @@ public class TagService implements TagRepository {
         return 0;
     }
 
+    /**
+     * Метод созданный для удаления данных из таблицы tag по id
+     *
+     * @param tag содержит данные о теге
+     * @return 0 если всё прошло без ошибок, а 1 если возникла ошибка
+     */
     @Override
     public int remove(Tag tag) {
         try {
@@ -95,6 +139,12 @@ public class TagService implements TagRepository {
         return 0;
     }
 
+    /**
+     * Метод созданный для нахождения данных из таблицы tag по id
+     *
+     * @param id содержит id тега
+     * @return объект тега со списком сертефикатов
+     */
     @Override
     public Tag getById(Long id) {
         session = Hibernate.getSessionFactory();
@@ -107,6 +157,15 @@ public class TagService implements TagRepository {
         return tag;
     }
 
+    /**
+     * Переопределённый метод созданный для нахождения данных из таблицы tag по id
+     * и сортирующий по имени и времени по ASC/DESC
+     *
+     * @param id содержит id тега
+     * @param sort содержит тип сотрировки
+     * @param sortBy лист с обьектами по которым надо сортировать
+     * @return объект тега со списком сертефикатов
+     */
     public Tag getById(Long id, String sort, List<String> sortBy) {
         session = Hibernate.getSessionFactory();
 
@@ -119,6 +178,12 @@ public class TagService implements TagRepository {
         return tag;
     }
 
+    /**
+     * Метод созданный для нахождения данных из таблицы tag по названию
+     *
+     * @param name содержит название тега
+     * @return объект тега со списком сертефикатов
+     */
     @Override
     public List<Tag> findByName(String name) {
         session = Hibernate.getSessionFactory();
@@ -131,6 +196,15 @@ public class TagService implements TagRepository {
         return tags;
     }
 
+    /**
+     * Переопределённый метод созданный для нахождения данных из таблицы tag по названию
+     * и сортирующий по имени и времени по ASC/DESC
+     *
+     * @param name содержит название тега
+     * @param sort содержит тип сотрировки
+     * @param sortBy лист с обьектами по которым надо сортировать
+     * @return объект тега со списком сертефикатов
+     */
     public List<Tag> findByName(String name, String sort, List<String> sortBy) {
         session = Hibernate.getSessionFactory();
 
@@ -143,6 +217,13 @@ public class TagService implements TagRepository {
         return tags;
     }
 
+    /**
+     * Метод созданный для сортировки данных по имени и времени по ASC/DESC
+     *
+     * @param tag содержит данные о теге
+     * @param sort содержит тип сотрировки
+     * @param sortBy лист с обьектами по которым надо сортировать
+     */
     private void sortedCertificates(Tag tag, String sort, List<String> sortBy){
         if("ASC".equals(sort)) {
             if(sortBy.stream().anyMatch("name"::equals)) {

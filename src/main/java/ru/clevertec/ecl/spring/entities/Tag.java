@@ -19,6 +19,10 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
+
+/**
+ * Класс хранящий информацию о тегах
+ */
 @Entity
 @Table(name = "tag")
 @Getter
@@ -28,14 +32,23 @@ import java.util.Set;
 @AllArgsConstructor
 public class Tag {
 
+    /**
+     * Поле с айди тега
+     */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private long id;
 
+    /**
+     * Поле с названием тега
+     */
     @Column(name = "name")
     private String name;
 
+    /**
+     * Поле со списком сертификатов
+     */
     @ManyToMany(fetch = FetchType.EAGER,
             cascade = {
                     CascadeType.PERSIST,
@@ -43,6 +56,7 @@ public class Tag {
             },
             mappedBy = "tags")
     @ToString.Exclude
+
     private Set<GiftCertificate> certificate = new HashSet<>();
 
     @Override

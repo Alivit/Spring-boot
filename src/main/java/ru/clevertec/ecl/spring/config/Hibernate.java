@@ -6,8 +6,15 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 
+/**
+ * Класс отвечающий за подключение к базе данных
+ * c помощью hibernate
+ */
 public class Hibernate {
 
+    /**
+     * Поле с классом хранящую сессию подключения к базе данных
+     */
     @PersistenceUnit(name = "factory")
     private static final SessionFactory sessionFactory;
 

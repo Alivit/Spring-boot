@@ -14,19 +14,28 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import ru.clevertec.ecl.spring.entities.Tag;
 import ru.clevertec.ecl.spring.exception.AppError;
+import ru.clevertec.ecl.spring.repository.TagRepository;
 import ru.clevertec.ecl.spring.services.TagService;
 
 import java.util.List;
 
+/**
+ * Класс контроллер для обработки запросов о теге
+ */
 @Controller
 @RequiredArgsConstructor
 public class TagController {
 
-    private final TagService tagService;
+    /**
+     * Это поле интерфейса описывающее поведение
+     * сервис обработчика запросов sql
+     * @see TagRepository
+     */
+    private final TagRepository tagRepository = new TagService();
 
     @GetMapping("/tags")
     public ResponseEntity<?> tagsInfo(){
-        List<Tag> tags = tagService.getAll();
+        List<Tag> tags = tagRepository.getAll();
 
         if(tags.size() == 0){
             return new ResponseEntity<>(new AppError(HttpStatus.NO_CONTENT.value(),
@@ -42,10 +51,10 @@ public class TagController {
         Tag tag;
 
         if(sort != null && sortBy != null) {
-            tag = tagService.getById(id, sort, sortBy);
+            tag = tagRepository.getById(id, sort, sortBy);
         }
         else {
-            tag = tagService.getById(id);
+            tag = tagRepository.getById(id);
         }
 
         if(tag == null) {
@@ -62,10 +71,10 @@ public class TagController {
         List<Tag> tags;
 
         if(sort != null && sortBy != null) {
-            tags = tagService.findByName(name, sort, sortBy);
+            tags = tagRepository.findByName(name, sort, sortBy);
         }
         else {
-            tags = tagService.findByName(name);
+            tags = tagRepository.findByName(name);
         }
 
         if(tags.size() == 0) {
@@ -79,7 +88,7 @@ public class TagController {
     @PostMapping("/tags")
     public ResponseEntity<?> createTags(@RequestParam("name") List<String> names, @RequestParam("price") List<Double> prices,
                            @RequestParam("duration") List<Integer> durations,@RequestParam("tag") String tag){
-        if(tagService.add(names,prices,durations,tag) == 1){
+        if(tagRepository.add(names,prices,durations,tag) == 1){
             return new ResponseEntity<>(new AppError(HttpStatus.INTERNAL_SERVER_ERROR.value(),
                     "Gift certificate with id " + tag + " nor created"), HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -90,7 +99,7 @@ public class TagController {
     @PutMapping("/tags")
     public ResponseEntity<?> updateTag(@RequestParam("name") List<String> names, @RequestParam("price") List<Double> prices,
                                                @RequestParam("duration") List<Integer> durations,@RequestParam("tag") String tag){
-        if(tagService.update(names,prices,durations,tag) == 1){
+        if(tagRepository.update(names,prices,durations,tag) == 1){
             return new ResponseEntity<>(new AppError(HttpStatus.INTERNAL_SERVER_ERROR.value(),
                     "Gift certificate with id " + tag + " nor updated"), HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -100,14 +109,14 @@ public class TagController {
 
     @DeleteMapping
     public ResponseEntity<?> deleteTag(@PathVariable Long id) {
-        Tag tag = tagService.getById(id);
+        Tag tag = tagRepository.getById(id);
 
         if(tag == null) {
             return new ResponseEntity<>(new AppError(HttpStatus.NOT_FOUND.value(),
                     "Tag with id " + id + " nor found"), HttpStatus.NOT_FOUND);
         }
 
-        if(tagService.remove(tag) == 1){
+        if(tagRepository.remove(tag) == 1){
             return new ResponseEntity<>(new AppError(HttpStatus.INTERNAL_SERVER_ERROR.value(),
                     "Tag with id " + id + " nor deleted"), HttpStatus.INTERNAL_SERVER_ERROR);
         }

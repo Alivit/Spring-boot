@@ -26,6 +26,10 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
+
+/**
+ * Класс хранящий информацию о подарочных сертификатах
+ */
 @Entity
 @Table(name = "gift_certificate")
 @Getter
@@ -35,23 +39,41 @@ import java.util.Set;
 @AllArgsConstructor
 public class GiftCertificate {
 
+    /**
+     * Поле с айди сертификата
+     */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private long id;
 
+    /**
+     * Поле с названием сертификата
+     */
     @Column(name = "name")
     private String name;
 
+    /**
+     * Поле с ценой сертификата
+     */
     @Column(name = "price")
     private double price;
 
+    /**
+     * Поле с продолжительностью сертификата
+     */
     @Column(name = "duration")
     private int duration;
 
+    /**
+     * Поле с датой создания сертификата
+     */
     @Column(name = "create_date")
     private LocalDateTime create_date;
 
+    /**
+     * Поле с датой обновления сертификата
+     */
     @Column(name = "last_update_data")
     private LocalDateTime last_update_data;
 
@@ -65,6 +87,9 @@ public class GiftCertificate {
         last_update_data = LocalDateTime.now();
     }
 
+    /**
+     * Поле со списком тегов
+     */
     @ManyToMany(fetch = FetchType.LAZY,
             cascade = {
                     CascadeType.PERSIST,
