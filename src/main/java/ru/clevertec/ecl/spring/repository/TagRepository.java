@@ -4,7 +4,7 @@ import ru.clevertec.ecl.spring.entities.Tag;
 
 import java.util.List;
 
-public interface TagRepository {
+public interface TagRepository { //тут можно extends и от бд в моем случае extends MongoRepository<'Сюда название модели', String> и тогда оно автоматом эти методы возьмет
 
     int add(List<String> names, List<Double> prices, List<Integer> durations, String tag);
 
