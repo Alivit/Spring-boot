@@ -1,29 +1,31 @@
-package ru.clevertec.ecl.spring.entities;
+package ru.clevertec.ecl.spring.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
+import jakarta.persistence.ConstraintMode;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.persistence.CascadeType;
 
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+import ru.clevertec.ecl.spring.entity.listener.GiftCertificateListener;
+
 import java.time.LocalDateTime;
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 
 
@@ -31,12 +33,14 @@ import java.util.Set;
  * Класс хранящий информацию о подарочных сертификатах
  */
 @Entity
-@Table(name = "gift_certificate")
+@EntityListeners(GiftCertificateListener.class)
+@Table(name = "gift_certificates")
 @Getter
 @Setter
 @ToString
-@RequiredArgsConstructor
+@EqualsAndHashCode
 @AllArgsConstructor
+@RequiredArgsConstructor
 public class GiftCertificate {
 
     /**
@@ -45,6 +49,7 @@ public class GiftCertificate {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
+    @EqualsAndHashCode.Exclude
     private long id;
 
     /**
@@ -77,42 +82,29 @@ public class GiftCertificate {
     @Column(name = "last_update_data")
     private LocalDateTime last_update_data;
 
-    @PrePersist
-    private void createDate(){
-        create_date = last_update_data = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    private void updateDate(){
-        last_update_data = LocalDateTime.now();
-    }
-
     /**
      * Поле со списком тегов
      */
-    @ManyToMany(fetch = FetchType.LAZY,
-            cascade = {
-                    CascadeType.PERSIST,
-                    CascadeType.MERGE,
-                    CascadeType.REFRESH
-            })
-    @JoinTable(name = "gift_certificate_tag",
-            joinColumns = @JoinColumn(name = "certificate_id"),
-            inverseJoinColumns = @JoinColumn(name = "tag_id")
+    @ManyToMany(
+            fetch = FetchType.LAZY,
+            cascade =
+                    {
+                            CascadeType.DETACH, CascadeType.MERGE,
+                            CascadeType.REFRESH, CascadeType.PERSIST
+                    },
+            targetEntity = Tag.class
     )
-    @JsonIgnore
+    @JoinTable(name = "gift_certificates_tags",
+            inverseJoinColumns = @JoinColumn(name = "tag_id",
+                    nullable = false,
+                    updatable = false),
+            joinColumns = @JoinColumn(name = "certificate_id",
+                    nullable = false,
+                    updatable = false),
+            foreignKey = @ForeignKey(ConstraintMode.CONSTRAINT),
+            inverseForeignKey = @ForeignKey(ConstraintMode.CONSTRAINT))
+    @EqualsAndHashCode.Exclude
     @ToString.Exclude
     private Set<Tag> tags = new HashSet<>();
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof GiftCertificate that)) return false;
-        return getId() == that.getId() && Double.compare(that.getPrice(), getPrice()) == 0 && getDuration() == that.getDuration() && Objects.equals(getName(), that.getName()) && Objects.equals(getCreate_date(), that.getCreate_date()) && Objects.equals(getLast_update_data(), that.getLast_update_data());
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(getId(), getName(), getPrice(), getDuration(), getCreate_date(), getLast_update_data());
-    }
 }

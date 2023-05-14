@@ -1,76 +1,73 @@
 package ru.clevertec.ecl.spring.services;
 
+import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import ru.clevertec.ecl.spring.entities.Tag;
+import org.mockito.Mock;
+import org.springframework.data.domain.Page;
+import ru.clevertec.ecl.spring.entity.Tag;
+import ru.clevertec.ecl.spring.repository.TagRepository;
+import ru.clevertec.ecl.spring.services.impl.TagServiceImpl;
 
-import java.util.List;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@RequiredArgsConstructor
 public class TagServiceTest {
 
-    TagService tagsService;
+    @Mock
+    private TagRepository tagRepository;
+    TagService service;
 
     private static Stream<Arguments> tagsArgumentsProvider(){
         return Stream.of(
-                Arguments.of("pink")
+                Arguments.of(new Tag(3, "pink", null))
         );
     }
 
     private static Stream<Arguments> tagsArgumentsProviderUpdate(){
         return Stream.of(
-                Arguments.of("yellow")
+                Arguments.of(new Tag(3, "yellow", null))
         );
     }
 
     @BeforeEach
     void init() {
-        tagsService = new TagService();
+        service = new TagServiceImpl(tagRepository);
     }
 
     @ParameterizedTest
     @MethodSource("tagsArgumentsProvider")
-    public void addTest(String tagName) {
-        List<String> names = List.of("gift1", "gift2");
-        List<Double> prices = List.of(100.00, 200.00);
-        List<Integer> durations = List.of(30, 45);
+    public void addTest(Tag tag) {
+        service.create(tag);
 
-        tagsService.add(names,prices,durations,tagName);
-
-        assertThat(tagsService.findByName("pink")).isNotNull();
+        assertThat(service.getByName("pink")).isNotNull();
     }
 
     @Test
     public void getAllTest(){
-        List<Tag> tagList = tagsService.getAll();
+        Page<Tag> tagList = service.getAll(4, 5, "id:ASC");
 
-        assertThat(tagList.size()).isNotEqualTo(0);
+        assertThat(tagList.getTotalPages()).isEqualTo(5);
     }
 
     @ParameterizedTest
     @MethodSource("tagsArgumentsProvider")
-    public void removeTest(String tagName) {
-        Tag tag = new Tag(0, tagName, null);
+    public void removeTest(Tag tag) {
+        service.deleteById(tag.getId());
 
-        tagsService.remove(tag);
-
-        assertThat(tagsService.findByName(tag.getName())).isNull();
+        assertThat(service.getByName(tag.getName())).isNull();
     }
 
     @ParameterizedTest
     @MethodSource("tagsArgumentsProviderUpdate")
-    public void updateTest(String tagName) {
-        List<String> names = List.of("gift3", "gift4");
-        List<Double> prices = List.of(130.00, 210.00);
-        List<Integer> durations = List.of(20, 43);
+    public void updateTest(Tag tag) {
+        service.update(tag);
 
-        tagsService.update(names,prices,durations,tagName);
-
-        assertThat(tagsService.findByName("yellow")).isNotNull();
+        assertThat(service.getByName("yellow")).isNotNull();
     }
 }

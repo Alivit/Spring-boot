@@ -5,7 +5,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import ru.clevertec.ecl.spring.entities.GiftCertificate;
+import org.mockito.Mock;
+import org.springframework.data.domain.Page;
+import ru.clevertec.ecl.spring.entity.GiftCertificate;
+import ru.clevertec.ecl.spring.repository.GiftCertificateRepository;
+import ru.clevertec.ecl.spring.services.GiftCertificateService;
+import ru.clevertec.ecl.spring.services.impl.GiftCertificateServiceImpl;
 
 import java.util.List;
 import java.util.Set;
@@ -13,13 +18,16 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class GiftCertificateServiceTest {
+public class GiftCertificateServiceImplTest {
 
-    GiftCertificateService giftCertificateService;
+    @Mock
+    private GiftCertificateRepository giftCertificateRepository;
+    GiftCertificateService service;
+
 
     private static Stream<Arguments> certificateArgumentsProvider(){
         return Stream.of(
-                Arguments.of(new GiftCertificate(0, "gift1", 120, 45, null, null, null))
+                Arguments.of(new GiftCertificate(3, "gift1", 120, 45, null, null, null))
         );
     }
 
@@ -31,31 +39,31 @@ public class GiftCertificateServiceTest {
 
     @BeforeEach
     void init() {
-        giftCertificateService = new GiftCertificateService();
+        service = new GiftCertificateServiceImpl(giftCertificateRepository);
     }
     @ParameterizedTest
     @MethodSource("certificateArgumentsProvider")
     public void addTest(GiftCertificate giftCertificate) {
         Set<String> setTags = Set.of("blue", "green", "red");
 
-        giftCertificateService.add(giftCertificate, setTags);
+        service.create(giftCertificate, setTags);
 
-        assertThat(giftCertificateService.getByName("gift1")).isNotNull();
+        assertThat(service.getByName("gift1")).isNotNull();
     }
 
     @Test
     public void getAllTest(){
-        List<GiftCertificate> certificateList = giftCertificateService.getAll();
+        Page<GiftCertificate> certificateList = service.getAll(5, 10,"id:DESC");
 
-        assertThat(certificateList.size()).isNotEqualTo(0);
+        assertThat(certificateList.getTotalPages()).isNotEqualTo(0);
     }
 
     @ParameterizedTest
     @MethodSource("certificateArgumentsProvider")
     public void removeTest(GiftCertificate certificate) {
-        giftCertificateService.remove(certificate);
+        service.deleteById(certificate.getId());
 
-        assertThat(giftCertificateService.getByName(certificate.getName())).isNull();
+        assertThat(service.getByName(certificate.getName())).isNull();
     }
 
     @ParameterizedTest
@@ -63,8 +71,8 @@ public class GiftCertificateServiceTest {
     public void updateTest(GiftCertificate certificate) {
         Set<String> setTags = Set.of("blue", "red");
 
-        giftCertificateService.update(certificate, setTags);
+        service.update(certificate, setTags);
 
-        assertThat(giftCertificateService.getByName("newGift")).isNotNull();
+        assertThat(service.getByName("newGift")).isNotNull();
     }
 }

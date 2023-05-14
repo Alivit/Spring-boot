@@ -1,22 +1,33 @@
 package ru.clevertec.ecl.spring.exception;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
+import org.springframework.http.HttpStatus;
+
+import java.time.LocalDateTime;
 
 /**
  * Класс хранящий информацию о ошибках приложения
  */
 @Data
 @AllArgsConstructor
-@NoArgsConstructor
 public class AppError {
+
     /**
      * Поле со статусом ошибки
      */
-    private int statusCode;
+    private final int status;
+
     /**
      * Поле с сообщением ошибки
      */
-    private String message;
+    private final String message;
+
+    /**
+     * Поле со временем ошибки
+     */
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+    private final LocalDateTime time = LocalDateTime.now();
+
 }

@@ -1,20 +1,13 @@
 package ru.clevertec.ecl.spring.repository;
 
-import ru.clevertec.ecl.spring.entities.GiftCertificate;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import ru.clevertec.ecl.spring.entity.GiftCertificate;
 
-import java.util.List;
 import java.util.Set;
 
-public interface GiftCertificateRepository {
-    int add(GiftCertificate certificate, Set<String> tagsSet);
+public interface GiftCertificateRepository extends JpaRepository<GiftCertificate, Long> {
 
-    List<GiftCertificate> getAll();
-
-    int update(GiftCertificate certificate, Set<String> tagsSet);
-
-    int remove(GiftCertificate certificate);
-
-    GiftCertificate getById(Long id);
-
-    List<GiftCertificate> getByName(String name);
+    @Query("FROM GiftCertificate WHERE name LIKE % : certificateName %")
+    GiftCertificate findByName(String certificateName);
 }

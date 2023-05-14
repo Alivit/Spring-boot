@@ -1,24 +1,14 @@
 package ru.clevertec.ecl.spring.repository;
 
-import ru.clevertec.ecl.spring.entities.Tag;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import ru.clevertec.ecl.spring.entity.GiftCertificate;
+import ru.clevertec.ecl.spring.entity.Tag;
 
 import java.util.List;
 
-public interface TagRepository {
+public interface TagRepository extends JpaRepository<Tag, Long> {
 
-    int add(List<String> names, List<Double> prices, List<Integer> durations, String tag);
-
-    List<Tag> getAll();
-
-    int update(List<String> names, List<Double> prices, List<Integer> durations, String tagName);
-
-    int remove(Tag tag);
-
-    Tag getById(Long id);
-
-    List<Tag> findByName(String name);
-
-    Tag getById(Long id, String sort, List<String> sortBy);
-
-    List<Tag> findByName(String name, String sort, List<String> sortBy);
+    @Query("FROM Tag WHERE name LIKE % : tagName %")
+    Tag findByName(String tagName);
 }
