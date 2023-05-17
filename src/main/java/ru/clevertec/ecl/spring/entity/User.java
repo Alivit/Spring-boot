@@ -8,6 +8,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -30,38 +32,27 @@ import java.util.List;
 @RequiredArgsConstructor
 public class User {
 
-    /**
-     * Поле с айди пользователя
-     */
     @Id
+    @Positive(message = "Id must be greater than 0")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
     @EqualsAndHashCode.Exclude
     private Long id;
 
-    /**
-     * Поле с почтой пользователя
-     */
-    @Column(name = "email", unique = true)
+    @Column(unique = true)
+    @NotBlank(message = "Email cannot be empty or null")
     private String email;
 
-    /**
-     * Поле с паролем пользователя
-     */
-    @Column(name = "password")
+    @NotBlank(message = "Password cannot be empty or null")
     private String password;
 
-    /**
-     * Поле со списком заказов
-     */
     @OneToMany(
             cascade = CascadeType.ALL,
             orphanRemoval = true,
             mappedBy = "user"
     )
+    @Builder.Default
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    @Builder.Default
     private List<Order> orders = new ArrayList<>();
 
 }

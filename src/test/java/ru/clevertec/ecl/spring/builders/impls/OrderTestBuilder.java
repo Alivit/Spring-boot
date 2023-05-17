@@ -20,7 +20,6 @@ public class OrderTestBuilder implements TestBuilder<Order> {
     private double price = 1.00;
     private LocalDateTime date_purchase = LocalDateTime.now();
     private LocalDateTime last_update_order = LocalDateTime.now();
-    private User user = UserTestBuilder.aUser().build();
     private Set<GiftCertificate> certificates = Set.of(
             GiftCertificateTestBuilder.aCertificate().build()
     );
@@ -32,7 +31,6 @@ public class OrderTestBuilder implements TestBuilder<Order> {
                 .price(price)
                 .date_purchase(date_purchase)
                 .last_update_order(last_update_order)
-                .user(user)
                 .certificates(certificates)
                 .build();
     }

@@ -1,11 +1,15 @@
 package ru.clevertec.ecl.spring.services.impl;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 import ru.clevertec.ecl.spring.entity.GiftCertificate;
 import ru.clevertec.ecl.spring.entity.Tag;
 import ru.clevertec.ecl.spring.exception.NotFoundException;
@@ -21,6 +25,7 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Service
+@Validated
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class GiftCertificateServiceImpl implements GiftCertificateService {
@@ -35,7 +40,7 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
      */
     @Override
     @Transactional
-    public GiftCertificate create(GiftCertificate certificate, Set<String> tags) {
+    public GiftCertificate create(@Valid GiftCertificate certificate, Set<String> tags) {
         try {
             repository.save(createCertificateWithTags(certificate, tags));
             log.info("Info certificate - name: {}, price: {}, duration: {} ",
@@ -88,7 +93,7 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
      */
     @Override
     @Transactional
-    public GiftCertificate update(GiftCertificate certificate) {
+    public GiftCertificate update(@Valid GiftCertificate certificate) {
         try {
             GiftCertificate certificateOld = repository.getReferenceById(certificate.getId());
             repository.save(updateCertificateWithTags(certificateOld, certificate));
@@ -110,7 +115,7 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
      */
     @Override
     @Transactional
-    public GiftCertificate deleteById(Long id) {
+    public GiftCertificate deleteById(@Positive Long id) {
         try {
             GiftCertificate certificate = getById(id);
             repository.delete(certificate);
@@ -131,7 +136,7 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
      * @return объект сертификата со списком тегов
      */
     @Override
-    public GiftCertificate getById(Long id) {
+    public GiftCertificate getById(@Positive Long id) {
         GiftCertificate certificate = repository.findById(id).orElseThrow(() ->
                 new NotFoundException("Certificate with id - " + id + " not found"));
         log.info("Certificate with id " + id + ": {}", certificate);
@@ -147,7 +152,7 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
      * @return объект сертификата со списком тегов
      */
     @Override
-    public GiftCertificate getByName(String name) {
+    public GiftCertificate getByName(@NotBlank String name) {
         GiftCertificate certificate = repository.findByName(name);
         if(certificate == null) throw new NotFoundException("Certificate with name - " + name + " not found");
         log.info("Certificate with name " + name + ": {}", certificate);

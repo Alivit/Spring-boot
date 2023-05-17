@@ -15,6 +15,9 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -43,44 +46,25 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class Order {
 
-    /**
-     * Поле с айди заказа
-     */
     @Id
+    @Positive(message = "Id must be greater than 0")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
     @EqualsAndHashCode.Exclude
     private long id;
 
-    /**
-     * Поле с ценой заказа
-     */
-    @Column(name = "price")
+    @Positive(message = "Price must be greater than 0.00 or 0")
+    @Pattern(regexp = "\\d{1,3}(?:[.,]\\d{3})*(?:[.,]\\d{2})")
     private double price;
 
-    /**
-     * Поле с датой покупки
-     */
-    @Column(name = "date_purchase")
     private LocalDateTime date_purchase;
-
-    /**
-     * Поле с датой обновления заказа
-     */
-    @Column(name = "last_update_order")
     private LocalDateTime last_update_order;
 
-    /**
-     * Поле с пользователем заказа
-     */
+    @Valid
     @ManyToOne(fetch = FetchType.LAZY)
-    @EqualsAndHashCode.Exclude
     @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private User user;
 
-    /**
-     * Поле со списком сертификатов
-     */
     @ManyToMany(fetch = FetchType.LAZY,
             cascade =
                     {
@@ -97,8 +81,8 @@ public class Order {
                     updatable = false),
             foreignKey = @ForeignKey(ConstraintMode.CONSTRAINT),
             inverseForeignKey = @ForeignKey(ConstraintMode.CONSTRAINT))
-    @EqualsAndHashCode.Exclude
-    @ToString.Exclude
     @Builder.Default
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Set<GiftCertificate> certificates = new HashSet<>();
 }

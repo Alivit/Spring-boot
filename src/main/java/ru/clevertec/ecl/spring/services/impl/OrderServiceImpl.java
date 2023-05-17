@@ -1,5 +1,7 @@
 package ru.clevertec.ecl.spring.services.impl;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -10,6 +12,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import org.springframework.validation.annotation.Validated;
 import ru.clevertec.ecl.spring.entity.GiftCertificate;
 import ru.clevertec.ecl.spring.entity.Order;
 import ru.clevertec.ecl.spring.entity.User;
@@ -25,6 +28,7 @@ import ru.clevertec.ecl.spring.services.OrderService;
  */
 @Slf4j
 @Service
+@Validated
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class OrderServiceImpl implements OrderService {
@@ -54,7 +58,7 @@ public class OrderServiceImpl implements OrderService {
      */
     @Override
     @Transactional
-    public Order create(Order order, Long idUser, Long idCertificate) {
+    public Order create(@Valid Order order,@Positive Long idUser,@Positive Long idCertificate) {
         try {
             GiftCertificate certificate = certificateRepository.findById(idCertificate).orElseThrow(() ->
                     new NotFoundException("Certificate with id - " + idCertificate + " not found"));
@@ -113,7 +117,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional
-    public Order update(Order order, User user, GiftCertificate certificate) {
+    public Order update(@Valid Order order,@Valid User user,@Valid GiftCertificate certificate) {
         try {
             orderRepository.save(updateOrderWithCertificate(order, certificate, user));
             log.info("Update order");
@@ -133,7 +137,7 @@ public class OrderServiceImpl implements OrderService {
      */
     @Override
     @Transactional
-    public Order deleteById(Long id) {
+    public Order deleteById(@Positive Long id) {
         try {
             Order order = getById(id);
             orderRepository.delete(order);
@@ -154,7 +158,7 @@ public class OrderServiceImpl implements OrderService {
      * @return заказа со всей информацией
      */
     @Override
-    public Order getById(Long id) {
+    public Order getById(@Positive Long id) {
         Order order = orderRepository.findById(id).orElseThrow(() ->
                 new NotFoundException("Order with id - " + id + " not found"));
         log.info("Order with id " + id + ": {}", order);

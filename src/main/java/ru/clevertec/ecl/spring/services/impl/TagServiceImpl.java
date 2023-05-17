@@ -1,5 +1,8 @@
 package ru.clevertec.ecl.spring.services.impl;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -8,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 import ru.clevertec.ecl.spring.entity.Tag;
 import ru.clevertec.ecl.spring.exception.NotFoundException;
 import ru.clevertec.ecl.spring.exception.ServerErrorException;
@@ -19,6 +23,7 @@ import ru.clevertec.ecl.spring.services.TagService;
  */
 @Slf4j
 @Service
+@Validated
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class TagServiceImpl implements TagService {
@@ -32,7 +37,7 @@ public class TagServiceImpl implements TagService {
      */
     @Override
     @Transactional
-    public Tag create(Tag tag) {
+    public Tag create(@Valid Tag tag) {
         try {
             repository.save(tag);
             log.info("Insert tag - name: {} ", tag.getName());
@@ -67,7 +72,7 @@ public class TagServiceImpl implements TagService {
      */
     @Override
     @Transactional
-    public Tag update(Tag tag) {
+    public Tag update(@Valid Tag tag) {
         try {
             Tag tagOld = repository.getReferenceById(tag.getId());
             tagOld.setName(tag.getName());
@@ -89,7 +94,7 @@ public class TagServiceImpl implements TagService {
      */
     @Override
     @Transactional
-    public Tag deleteById(Long id) {
+    public Tag deleteById(@Positive Long id) {
         try {
             Tag tag = getById(id);
             repository.delete(tag);
@@ -110,7 +115,7 @@ public class TagServiceImpl implements TagService {
      * @return тега со всей информацией
      */
     @Override
-    public Tag getById(Long id) {
+    public Tag getById(@Positive Long id) {
         Tag tag = repository.findById(id).orElseThrow(() ->
                 new NotFoundException("Tag with id - " + id + " not found"));
         log.info("Tag with id " + id + ": {}", tag);
@@ -126,7 +131,7 @@ public class TagServiceImpl implements TagService {
      * @return тега со всей информацией
      */
     @Override
-    public Tag getByName(String name) {
+    public Tag getByName(@NotBlank String name) {
         Tag tag = repository.findByName(name);
         if(tag == null) throw new NotFoundException("Tag with name - " + name + " not found");
         log.info("Tag with name " + name + ": {}", tag);

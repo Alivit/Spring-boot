@@ -1,7 +1,6 @@
 package ru.clevertec.ecl.spring.entity;
 
 import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
 import jakarta.persistence.ConstraintMode;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -13,6 +12,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -39,24 +40,15 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class Tag {
 
-    /**
-     * Поле с айди тега
-     */
     @Id
+    @Positive(message = "Id must be greater than 0")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
     @EqualsAndHashCode.Exclude
     private long id;
 
-    /**
-     * Поле с названием тега
-     */
-    @Column(name = "name")
+    @NotBlank(message = "Name cannot be empty or null")
     private String name;
 
-    /**
-     * Поле со списком сертификатов
-     */
     @ManyToMany(
             fetch = FetchType.LAZY,
             cascade =
@@ -74,9 +66,9 @@ public class Tag {
                     updatable = false),
             foreignKey = @ForeignKey(ConstraintMode.CONSTRAINT),
             inverseForeignKey = @ForeignKey(ConstraintMode.CONSTRAINT))
+    @Builder.Default
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    @Builder.Default
     private Set<GiftCertificate> certificate = new HashSet<>();
 
 }

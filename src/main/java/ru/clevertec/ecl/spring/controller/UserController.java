@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import ru.clevertec.ecl.spring.entity.Tag;
 import ru.clevertec.ecl.spring.entity.User;
 
 import ru.clevertec.ecl.spring.services.UserService;
@@ -32,17 +33,21 @@ public class UserController {
 
     @GetMapping("/{id}")
     public ResponseEntity<User> getUserById(@PathVariable Long id){
-        log.info("Find user by id: {}", id);
+        log.info("Request: find user by id: {}", id);
 
-        return new ResponseEntity<>(service.getById(id),HttpStatus.FOUND);
+        User response = service.getById(id);
+        log.info("Response: found user: {}", response.toString());
+
+        return new ResponseEntity<>(response,HttpStatus.FOUND);
     }
 
     @GetMapping
-    public ResponseEntity<Page<User>> getUsers(Pageable pageable)
-    {
-        log.info("Get all users with page: {}, size: {}, sort: {}",
-                pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort());
+    public ResponseEntity<Page<User>> getUsers(Pageable pageable) {
+        log.info("Request: get all users with Pageable: {}", pageable.toString());
 
-        return new ResponseEntity<>(service.getAll(pageable),HttpStatus.FOUND);
+        Page<User> response = service.getAll(pageable);
+        log.info("Response: received number of users - {}", response.getTotalPages());
+
+        return new ResponseEntity<>(response,HttpStatus.FOUND);
     }
 }

@@ -1,11 +1,8 @@
 package ru.clevertec.ecl.spring.controller;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotEmpty;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,7 +12,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -35,46 +31,62 @@ public class TagController {
     private final TagService service;
 
     @GetMapping
-    public ResponseEntity<Page<Tag>> getTags(Pageable pageable)
-    {
-        log.info("Get all tags with page: {}, size: {}, sort: {}",
-                pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort());
+    public ResponseEntity<Page<Tag>> getTags(Pageable pageable) {
+        log.info("Request: get all tags with Pageable: {}", pageable.toString());
 
-        return new ResponseEntity<>(service.getAll(pageable),HttpStatus.FOUND);
+        Page<Tag> response = service.getAll(pageable);
+        log.info("Response: received number of tags - {}", response.getTotalPages());
+
+        return new ResponseEntity<>(response,HttpStatus.FOUND);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Tag> getTagById(@PathVariable Long id){
-        log.info("Find tag by id: {}", id);
+        log.info("Request: find tag by id: {}", id);
 
-        return new ResponseEntity<>(service.getById(id),HttpStatus.FOUND);
+        Tag response = service.getById(id);
+        log.info("Response: found tag: {}", response.toString());
+
+        return new ResponseEntity<>(response,HttpStatus.FOUND);
     }
 
     @GetMapping("/name")
     public ResponseEntity<Tag> getTagByName(@RequestParam String name){
-        log.info("Find tag by name: {}", name);
+        log.info("Request: find tag by name: {}", name);
 
-        return new ResponseEntity<>(service.getByName(name),HttpStatus.FOUND);
+        Tag response = service.getByName(name);
+        log.info("Response: found tag: {}", response.toString());
+
+        return new ResponseEntity<>(response,HttpStatus.FOUND);
     }
 
     @PostMapping
-    public ResponseEntity<Tag> createTag(@RequestBody @Valid Tag tag) {
-        log.info("Info tag - name: {} ", tag.getName());
+    public ResponseEntity<Tag> createTag(Tag tag) {
+        log.info("Request: info tag: {}", tag.toString());
 
-        return new ResponseEntity<>(service.create(tag),HttpStatus.CREATED);
+        Tag response = service.create(tag);
+        log.info("Response: created tag: {}", response.toString());
+
+        return new ResponseEntity<>(response,HttpStatus.CREATED);
     }
 
     @PutMapping
-    public ResponseEntity<Tag> updateTag(@RequestBody @Valid Tag tag){
-        log.info("Info tag - name: {} ", tag.getName());
+    public ResponseEntity<Tag> updateTag(Tag tag){
+        log.info("Request: info tag: {}", tag.toString());
 
-        return ResponseEntity.ok(service.update(tag));
+        Tag response = service.update(tag);
+        log.info("Response: updated tag: {}", response.toString());
+
+        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Tag> deleteTag(@PathVariable Long id) {
-        log.info("Delete tag by id: {}", id);
+        log.info("Request: delete tag by id: {}", id);
 
-        return ResponseEntity.ok(service.deleteById(id));
+        Tag response = service.deleteById(id);
+        log.info("Response: deleted tag: {}", response.toString());
+
+        return ResponseEntity.ok(response);
     }
 }

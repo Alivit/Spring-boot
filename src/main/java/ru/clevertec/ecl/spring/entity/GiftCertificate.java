@@ -15,6 +15,9 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.CascadeType;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -45,48 +48,26 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class GiftCertificate {
 
-    /**
-     * Поле с айди сертификата
-     */
     @Id
+    @Positive(message = "Id must be greater than 0")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
     @EqualsAndHashCode.Exclude
     private long id;
 
-    /**
-     * Поле с названием сертификата
-     */
-    @Column(name = "name")
+    @NotBlank(message = "Name cannot be empty or null")
     private String name;
 
-    /**
-     * Поле с ценой сертификата
-     */
-    @Column(name = "price")
+    @Positive(message = "Price must be greater than 0.00 or 0")
+    @Pattern(regexp = "\\d{1,3}(?:[.,]\\d{3})*(?:[.,]\\d{2})")
     private double price;
 
-    /**
-     * Поле с продолжительностью сертификата
-     */
+    @Positive(message = "Duration must be greater than 0")
     @Column(name = "duration")
     private int duration;
 
-    /**
-     * Поле с датой создания сертификата
-     */
-    @Column(name = "create_date")
     private LocalDateTime create_date;
-
-    /**
-     * Поле с датой обновления сертификата
-     */
-    @Column(name = "last_update_data")
     private LocalDateTime last_update_data;
 
-    /**
-     * Поле со списком тегов
-     */
     @ManyToMany(
             fetch = FetchType.LAZY,
             cascade =
@@ -105,9 +86,9 @@ public class GiftCertificate {
                     updatable = false),
             foreignKey = @ForeignKey(ConstraintMode.CONSTRAINT),
             inverseForeignKey = @ForeignKey(ConstraintMode.CONSTRAINT))
-    @EqualsAndHashCode.Exclude
-    @ToString.Exclude
     @Builder.Default
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Set<Tag> tags = new HashSet<>();
 
 }

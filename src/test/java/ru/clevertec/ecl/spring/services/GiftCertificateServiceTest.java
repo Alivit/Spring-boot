@@ -14,15 +14,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import ru.clevertec.ecl.spring.builders.impls.TagTestBuilder;
-import ru.clevertec.ecl.spring.builders.impls.UserTestBuilder;
-import ru.clevertec.ecl.spring.entity.Tag;
-import ru.clevertec.ecl.spring.entity.User;
+import ru.clevertec.ecl.spring.builders.impls.GiftCertificateTestBuilder;
+import ru.clevertec.ecl.spring.entity.GiftCertificate;
 import ru.clevertec.ecl.spring.exception.NotFoundException;
 import ru.clevertec.ecl.spring.exception.ServerErrorException;
-import ru.clevertec.ecl.spring.repository.TagRepository;
-import ru.clevertec.ecl.spring.services.impl.TagServiceImpl;
+import ru.clevertec.ecl.spring.repository.GiftCertificateRepository;
+import ru.clevertec.ecl.spring.services.impl.GiftCertificateServiceImpl;
 
 import java.util.List;
 import java.util.Optional;
@@ -31,61 +28,61 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 
 @ExtendWith(MockitoExtension.class)
 @RequiredArgsConstructor
-public class TagServiceTest {
+public class GiftCertificateServiceTest {
 
     @Mock
-    private TagRepository tagRepository;
-    TagService service;
+    private GiftCertificateRepository certificateRepository;
+    GiftCertificateService service;
 
-    private final TagTestBuilder TAG_TEST_BUILDER = TagTestBuilder.aTag();
+    private static final GiftCertificateTestBuilder CERTIFICATE_TEST_BUILDER = GiftCertificateTestBuilder.aCertificate();
 
-    private static Stream<Arguments> tagsArgumentsProvider(){
+
+    private static Stream<Arguments> certificateArgumentsProvider(){
         return Stream.of(
-                Arguments.of(new Tag(3, "pink", null))
+                Arguments.of(new GiftCertificate(3, "gift1", 120, 45, null, null, null))
         );
     }
 
-    private static Stream<Arguments> tagsArgumentsProviderUpdate(){
+    private static Stream<Arguments> certificateArgumentsProviderUpdate(){
         return Stream.of(
-                Arguments.of(new Tag(3, "yellow", null))
+                Arguments.of(new GiftCertificate(0, "newGift", 120, 45, null, null, null))
         );
     }
 
     @BeforeEach
     void init() {
-        service = new TagServiceImpl(tagRepository);
+        service = new GiftCertificateServiceImpl(certificateRepository);
     }
 
     @Nested
-    class CreateTagTest{
+    class CreateCertificateTest{
 
         @ParameterizedTest
-        @MethodSource("ru.clevertec.ecl.spring.services.TagServiceTest#tagsArgumentsProvider")
-        public void addTest(Tag tag) {
-            service.create(tag);
+        @MethodSource("ru.clevertec.ecl.spring.services.GiftCertificateServiceTest#certificateArgumentsProvider")
+        public void removeTest(GiftCertificate certificate) {
+            service.deleteById(certificate.getId());
 
-            assertThat(service.getByName("pink")).isNotNull();
+            assertThat(service.getByName(certificate.getName())).isNull();
         }
 
         @Test
         void createTagShouldReturnException() {
-            Tag actual = TAG_TEST_BUILDER.build();
-            String expectedError = "Error with Created tag: ";
+            GiftCertificate actual = CERTIFICATE_TEST_BUILDER.build();
+            String expectedError = "Error with Created";
 
             lenient()
                     .doThrow(new ServerErrorException(expectedError))
-                    .when(tagRepository)
+                    .when(certificateRepository)
                     .save(actual);
 
             Exception exception = assertThrows(ServerErrorException.class,
-                    () -> service.create(actual));
+                    () -> service.create(actual, null));
             String actualError = exception.getMessage();
 
             assertThat(actualError).contains(expectedError);
@@ -97,15 +94,16 @@ public class TagServiceTest {
     class FindByIdTest {
 
         @Test
-        void FindByIdShouldReturnTag() {
-            Tag expected = TAG_TEST_BUILDER.build();
+        void FindByIdShouldReturnCertificate() {
+            GiftCertificate expected = CERTIFICATE_TEST_BUILDER.build();
             long id = expected.getId();
 
             doReturn(Optional.of(expected))
-                    .when(tagRepository)
+                    .when(certificateRepository)
                     .findById(id);
 
-            Tag actual = service.getById(id);
+
+            GiftCertificate actual = service.getById(id);
 
             assertThat(actual).isEqualTo(expected);
         }
@@ -115,23 +113,23 @@ public class TagServiceTest {
             long id = 2L;
 
             doThrow(new NotFoundException(""))
-                    .when(tagRepository)
+                    .when(certificateRepository)
                     .findById(id);
 
-            assertThrows(NotFoundException.class, () -> tagRepository.findById(id));
+            assertThrows(NotFoundException.class, () -> certificateRepository.findById(id));
         }
 
         @Test
         void findByIdShouldReturnThrowExceptionWithMessage() {
             long id = 5L;
-            String expectedError = "Tag with id - " + id + " not found";
+            String expectedError = "Certificate with id - " + id + " not found";
 
             doThrow(new NotFoundException(expectedError))
-                    .when(tagRepository)
+                    .when(certificateRepository)
                     .findById(id);
 
             Exception exception = assertThrows(NotFoundException.class,
-                    () -> tagRepository.findById(id));
+                    () -> certificateRepository.findById(id));
             String actualError = exception.getMessage();
 
             assertThat(actualError).isEqualTo(expectedError);
@@ -143,16 +141,16 @@ public class TagServiceTest {
     class FindByNameTest {
 
         @Test
-        void FindByNameShouldReturnTag() {
-            Tag expected = TAG_TEST_BUILDER.build();
+        void FindByNameShouldReturnCertificate() {
+            GiftCertificate expected = CERTIFICATE_TEST_BUILDER.build();
             String name = expected.getName();
 
             doReturn(expected)
-                    .when(tagRepository)
+                    .when(certificateRepository)
                     .findByName(name);
 
 
-            Tag actual = service.getByName(name);
+            GiftCertificate actual = service.getByName(name);
 
             assertThat(actual).isEqualTo(expected);
         }
@@ -162,23 +160,23 @@ public class TagServiceTest {
             String name = "default";
 
             doThrow(new NotFoundException(""))
-                    .when(tagRepository)
+                    .when(certificateRepository)
                     .findByName(name);
 
-            assertThrows(NotFoundException.class, () -> tagRepository.findByName(name));
+            assertThrows(NotFoundException.class, () -> certificateRepository.findByName(name));
         }
 
         @Test
         void findByNameShouldReturnThrowExceptionWithMessage() {
             String name = "default";
-            String expectedError = "Tag with name - " + name + " not found";
+            String expectedError = "Certificate with name - " + name + " not found";
 
             doThrow(new NotFoundException(expectedError))
-                    .when(tagRepository)
+                    .when(certificateRepository)
                     .findByName(name);
 
             Exception exception = assertThrows(NotFoundException.class,
-                    () -> tagRepository.findByName(name));
+                    () -> certificateRepository.findByName(name));
             String actualError = exception.getMessage();
 
             assertThat(actualError).isEqualTo(expectedError);
@@ -193,28 +191,28 @@ public class TagServiceTest {
 
             int expectedSize = 1;
             Pageable pageable = PageRequest.of(1,1);
-            Page<Tag> page = new PageImpl<>(List.of(TAG_TEST_BUILDER.build()));
+            Page<GiftCertificate> page = new PageImpl<>(List.of(CERTIFICATE_TEST_BUILDER.build()));
 
             doReturn(page)
-                    .when(tagRepository)
+                    .when(certificateRepository)
                     .findAll(any(PageRequest.class));
 
-            Page<Tag> actualValues = service.getAll(pageable);
+            Page<GiftCertificate> actualValues = service.getAll(pageable);
 
             assertThat(actualValues).hasSize(expectedSize);
         }
 
         @Test
-        void testShouldReturnListWithContainsTag() {
-            Tag expected = TAG_TEST_BUILDER.build();
+        void testShouldReturnListWithContainsCertificate() {
+            GiftCertificate expected = CERTIFICATE_TEST_BUILDER.build();
             Pageable pageable = PageRequest.of(1,1);
-            Page<Tag> page = new PageImpl<>(List.of(expected));
+            Page<GiftCertificate> page = new PageImpl<>(List.of(expected));
 
             doReturn(page)
-                    .when(tagRepository)
+                    .when(certificateRepository)
                     .findAll(any(PageRequest.class));
 
-            Page<Tag> actualValues = service.getAll(pageable);
+            Page<GiftCertificate> actualValues = service.getAll(pageable);
 
             assertThat(actualValues).contains(expected);
         }
@@ -224,7 +222,7 @@ public class TagServiceTest {
             Pageable pageable = PageRequest.of(1,1);
 
             doThrow(new NotFoundException(""))
-                    .when(tagRepository)
+                    .when(certificateRepository)
                     .findAll(any(PageRequest.class));
 
             assertThrows(NotFoundException.class, () -> service.getAll(pageable));
@@ -232,24 +230,24 @@ public class TagServiceTest {
     }
 
     @Nested
-    class DeleteTagTest{
+    class DeleteCertificateTest{
 
         @ParameterizedTest
-        @MethodSource("ru.clevertec.ecl.spring.services.TagServiceTest#tagsArgumentsProvider")
-        public void deleteTest(Tag tag) {
-            Tag expected = service.deleteById(tag.getId());
+        @MethodSource("ru.clevertec.ecl.spring.services.GiftCertificateServiceTest#certificateArgumentsProvider")
+        public void removeTest(GiftCertificate certificate) {
+            service.deleteById(certificate.getId());
 
-            assertThat(tag).isEqualTo(expected);
+            assertThat(service.getByName(certificate.getName())).isNull();
         }
 
         @Test
-        void deleteTagShouldReturnException() {
-            long id = TAG_TEST_BUILDER.build().getId();
-            String expectedError = "Tag with id - " + id + " not found";
+        void deleteCertificateShouldReturnException() {
+            long id = CERTIFICATE_TEST_BUILDER.build().getId();
+            String expectedError = "Certificate with id - " + id + " not found";
 
             lenient()
                     .doThrow(new NotFoundException(expectedError))
-                    .when(tagRepository)
+                    .when(certificateRepository)
                     .deleteById(id);
 
             Exception exception = assertThrows(NotFoundException.class,
@@ -262,24 +260,24 @@ public class TagServiceTest {
     }
 
     @Nested
-    class UpdateTagTest{
+    class UpdateCertificateTest{
 
         @ParameterizedTest
-        @MethodSource("ru.clevertec.ecl.spring.services.TagServiceTest#tagsArgumentsProviderUpdate")
-        public void updateTest(Tag tag) {
-            service.update(tag);
+        @MethodSource("ru.clevertec.ecl.spring.services.GiftCertificateServiceTest#certificateArgumentsProviderUpdate")
+        public void updateTest(GiftCertificate certificate) {
+            service.update(certificate);
 
-            assertThat(service.getByName("yellow")).isNotNull();
+            assertThat(service.getByName("newGift")).isNotNull();
         }
 
         @Test
-        void updateTagShouldReturnException() {
-            Tag actual = TAG_TEST_BUILDER.build();
-            String expectedError = "Error with Update tag: ";
+        void updateCertificateShouldReturnException() {
+            GiftCertificate actual = CERTIFICATE_TEST_BUILDER.build();
+            String expectedError = "Error with Update";
 
             lenient()
                     .doThrow(new ServerErrorException(expectedError))
-                    .when(tagRepository)
+                    .when(certificateRepository)
                     .save(actual);
 
             Exception exception = assertThrows(ServerErrorException.class,
@@ -290,4 +288,5 @@ public class TagServiceTest {
         }
 
     }
+
 }

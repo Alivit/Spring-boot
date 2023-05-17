@@ -1,5 +1,6 @@
 package ru.clevertec.ecl.spring.services.impl;
 
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -8,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 import ru.clevertec.ecl.spring.entity.User;
 import ru.clevertec.ecl.spring.exception.NotFoundException;
 import ru.clevertec.ecl.spring.repository.UserRepository;
@@ -15,6 +17,7 @@ import ru.clevertec.ecl.spring.services.UserService;
 
 @Slf4j
 @Service
+@Validated
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class  UserServiceImpl implements UserService {
@@ -29,7 +32,7 @@ public class  UserServiceImpl implements UserService {
      * @return пользователя со всей информацией
      */
     @Override
-    public User getById(Long id) {
+    public User getById(@Positive Long id) {
         User user = repository.findById(id).orElseThrow(() ->
                 new NotFoundException("User with id - " + id + " not found"));
         log.info("User with id " + id + ": {}", user);
