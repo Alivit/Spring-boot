@@ -1,12 +1,14 @@
 package ru.clevertec.ecl.spring.controller;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 
@@ -17,7 +19,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import ru.clevertec.ecl.spring.entity.Tag;
 import ru.clevertec.ecl.spring.services.TagService;
@@ -31,64 +32,49 @@ import ru.clevertec.ecl.spring.services.TagService;
 @RequiredArgsConstructor
 public class TagController {
 
-    /**
-     * Это поле интерфейса описывающее поведение
-     * сервис обработчика запросов тэгов
-     * @see TagService
-     */
     private final TagService service;
 
     @GetMapping
-    @ResponseStatus(HttpStatus.FOUND)
-    public Page<Tag> getTags(@RequestParam(value = "offset", defaultValue = "0") @Min(0) Integer offset,
-                              @RequestParam(value = "limit", defaultValue = "10") @Min(1) Integer limit,
-                              @RequestParam(value = "sort", defaultValue = "id,ASC")@NotEmpty String sort)
+    public ResponseEntity<Page<Tag>> getTags(Pageable pageable)
     {
-        log.info("Get all tags with offset: {}, limit: {}, sort: {}", offset, limit, sort);
+        log.info("Get all tags with page: {}, size: {}, sort: {}",
+                pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort());
 
-        return service.getAll(offset, limit, sort);
+        return new ResponseEntity<>(service.getAll(pageable),HttpStatus.FOUND);
     }
 
     @GetMapping("/{id}")
-    @ResponseStatus(HttpStatus.FOUND)
-    public Tag getTagById(@PathVariable Long id){
+    public ResponseEntity<Tag> getTagById(@PathVariable Long id){
         log.info("Find tag by id: {}", id);
 
-        return service.getById(id);
+        return new ResponseEntity<>(service.getById(id),HttpStatus.FOUND);
     }
 
-    @GetMapping("/{name}")
-    @ResponseStatus(HttpStatus.FOUND)
-    public Tag getTagByName(@PathVariable("name") String name){
+    @GetMapping("/name")
+    public ResponseEntity<Tag> getTagByName(@RequestParam String name){
         log.info("Find tag by name: {}", name);
 
-        return service.getByName(name);
+        return new ResponseEntity<>(service.getByName(name),HttpStatus.FOUND);
     }
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public Tag createTag(@RequestBody @Valid Tag tag)
-    {
-        service.create(tag);
+    public ResponseEntity<Tag> createTag(@RequestBody @Valid Tag tag) {
         log.info("Info tag - name: {} ", tag.getName());
 
-        return tag;
+        return new ResponseEntity<>(service.create(tag),HttpStatus.CREATED);
     }
 
     @PutMapping
-    @ResponseStatus(HttpStatus.OK)
-    public Tag updateTag(@RequestBody @Valid Tag tag){
-        service.update(tag);
+    public ResponseEntity<Tag> updateTag(@RequestBody @Valid Tag tag){
         log.info("Info tag - name: {} ", tag.getName());
 
-        return tag;
+        return ResponseEntity.ok(service.update(tag));
     }
 
     @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.OK)
-    public Tag deleteTag(@PathVariable Long id) {
+    public ResponseEntity<Tag> deleteTag(@PathVariable Long id) {
         log.info("Delete tag by id: {}", id);
 
-        return service.deleteById(id);
+        return ResponseEntity.ok(service.deleteById(id));
     }
 }

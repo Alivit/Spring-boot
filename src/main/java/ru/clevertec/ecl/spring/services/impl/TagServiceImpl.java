@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,11 +23,6 @@ import ru.clevertec.ecl.spring.services.TagService;
 @RequiredArgsConstructor
 public class TagServiceImpl implements TagService {
 
-    /**
-     * Это поле интерфейса описывающее поведение
-     * сервис обработчика запросов sql
-     * @see TagRepository
-     */
     private final TagRepository repository;
 
     /**
@@ -36,10 +32,11 @@ public class TagServiceImpl implements TagService {
      */
     @Override
     @Transactional
-    public void create(Tag tag) {
+    public Tag create(Tag tag) {
         try {
             repository.save(tag);
             log.info("Insert tag - name: {} ", tag.getName());
+            return getById(tag.getId());
         }catch (Exception e){
             throw new ServerErrorException("Error with Insert tag: " + e);
         }
@@ -50,41 +47,18 @@ public class TagServiceImpl implements TagService {
      * offset - начало страницы, limit - конец страницы
      * и сортирующий страницу по имени поля и по методу ASC/DESC
      *
-     * @param offset содержит начало страницы
-     * @param limit содержит конец страницы
-     * @param sort лист с обьектами по которым надо сортировать
+     * @param pageable содержит информацию о страницы
      *
      * @return страницу тегов со всей информацией
      */
     @Override
-    public Page<Tag> getAll(Integer offset, Integer limit, String sort) {
-        String[] sorting = sort.split(",");
-
-        Page<Tag> tags = repository.findAll(
-                PageRequest.of(offset,limit, sortSetting(sorting[0], sorting[1])));
+    public Page<Tag> getAll(Pageable pageable) {
+        Page<Tag> tags = repository.findAll(pageable);
         if(tags.isEmpty()) throw new NotFoundException("Tags not found");
         log.info("Tags : {}", tags);
 
         return tags;
     }
-
-    /**
-     * Метод который настраивает сортировку по имени поля и по методу ASC/DESC
-     *
-     * @param sortField содержит имя поле
-     * @param sortMethod содержит метод сортировки ASC/DESC
-     *
-     * @return объект сортировки
-     */
-    private Sort sortSetting(String sortField, String sortMethod){
-        if("ASC".equals(sortMethod)) {
-            return Sort.by(Sort.Direction.ASC, sortField);
-        }
-        else {
-            return Sort.by(Sort.Direction.DESC, sortField);
-        }
-    }
-
 
     /**
      * Метод созданный для обновлении данных о теге в таблице tags
@@ -93,12 +67,14 @@ public class TagServiceImpl implements TagService {
      */
     @Override
     @Transactional
-    public void update(Tag tag) {
+    public Tag update(Tag tag) {
         try {
             Tag tagOld = repository.getReferenceById(tag.getId());
             tagOld.setName(tag.getName());
             repository.save(tag);
             log.info("Update tag - name: {} ", tag.getName());
+
+            return getById(tag.getId());
         }catch (Exception e){
             throw new ServerErrorException("Error with Update tag: " + e);
         }

@@ -1,15 +1,17 @@
 package ru.clevertec.ecl.spring.services;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import ru.clevertec.ecl.spring.entity.Tag;
 
 public interface TagService {
 
-    public void create(Tag tag);
+    public Tag create(Tag tag);
 
-    public Page<Tag> getAll(Integer offset, Integer limit, String sort);
+    public Page<Tag> getAll(Pageable pageable);
 
-    public void update(Tag tag);
+    public Tag update(Tag tag);
 
     public Tag deleteById(Long id);
 

@@ -14,6 +14,7 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +33,7 @@ import java.util.Set;
 @Getter
 @Setter
 @ToString
+@Builder
 @EqualsAndHashCode
 @AllArgsConstructor
 @RequiredArgsConstructor
@@ -74,6 +76,7 @@ public class Tag {
             inverseForeignKey = @ForeignKey(ConstraintMode.CONSTRAINT))
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
+    @Builder.Default
     private Set<GiftCertificate> certificate = new HashSet<>();
 
 }

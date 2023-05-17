@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,11 +19,6 @@ import ru.clevertec.ecl.spring.services.UserService;
 @RequiredArgsConstructor
 public class  UserServiceImpl implements UserService {
 
-    /**
-     * Это поле интерфейса описывающее поведение
-     * сервис обработчика запросов sql
-     * @see UserRepository
-     */
     private final UserRepository repository;
 
     /**
@@ -46,38 +42,17 @@ public class  UserServiceImpl implements UserService {
      * offset - начало страницы, limit - конец страницы
      * и сортирующий страницу по имени поля и по методу ASC/DESC
      *
-     * @param offset содержит начало страницы
-     * @param limit содержит конец страницы
-     * @param sort лист с обьектами по которым надо сортировать
+     * @param pageable содержит информацию о страницы
      *
      * @return страницу пользователей со всей информацией
      */
     @Override
-    public Page<User> getAll(Integer offset, Integer limit, String sort) {
-        String[] sorting = sort.split(",");
-
-        Page<User> users = repository.findAll(
-                PageRequest.of(offset,limit, sortSetting(sorting[0], sorting[1])));
+    public Page<User> getAll(Pageable pageable) {
+        Page<User> users = repository.findAll(pageable);
         if(users.isEmpty()) throw new NotFoundException("Users not found");
         log.info("Users : {}", users);
 
         return users;
     }
 
-    /**
-     * Метод который настраивает сортировку по имени поля и по методу ASC/DESC
-     *
-     * @param sortField содержит имя поле
-     * @param sortMethod содержит метод сортировки ASC/DESC
-     *
-     * @return объект сортировки
-     */
-    private Sort sortSetting(String sortField, String sortMethod){
-        if("ASC".equals(sortMethod)) {
-            return Sort.by(Sort.Direction.ASC, sortField);
-        }
-        else {
-            return Sort.by(Sort.Direction.DESC, sortField);
-        }
-    }
 }

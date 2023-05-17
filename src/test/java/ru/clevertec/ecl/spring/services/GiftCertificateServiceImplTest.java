@@ -7,12 +7,13 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import ru.clevertec.ecl.spring.entity.GiftCertificate;
 import ru.clevertec.ecl.spring.repository.GiftCertificateRepository;
-import ru.clevertec.ecl.spring.services.GiftCertificateService;
 import ru.clevertec.ecl.spring.services.impl.GiftCertificateServiceImpl;
 
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -53,7 +54,8 @@ public class GiftCertificateServiceImplTest {
 
     @Test
     public void getAllTest(){
-        Page<GiftCertificate> certificateList = service.getAll(5, 10,"id:DESC");
+        Pageable pageable = PageRequest.of(5, 10, Sort.by("id"));
+        Page<GiftCertificate> certificateList = service.getAll(pageable);
 
         assertThat(certificateList.getTotalPages()).isNotEqualTo(0);
     }
@@ -71,7 +73,7 @@ public class GiftCertificateServiceImplTest {
     public void updateTest(GiftCertificate certificate) {
         Set<String> setTags = Set.of("blue", "red");
 
-        service.update(certificate, setTags);
+        service.update(certificate);
 
         assertThat(service.getByName("newGift")).isNotNull();
     }

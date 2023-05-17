@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,11 +29,6 @@ import ru.clevertec.ecl.spring.services.OrderService;
 @RequiredArgsConstructor
 public class OrderServiceImpl implements OrderService {
 
-    /**
-     * Это поле интерфейса описывающее поведение
-     * сервис обработчика запросов sql
-     * @see OrderRepository
-     */
     private final OrderRepository orderRepository;
 
     /**
@@ -58,7 +54,7 @@ public class OrderServiceImpl implements OrderService {
      */
     @Override
     @Transactional
-    public void create(Order order, Long idUser, Long idCertificate) {
+    public Order create(Order order, Long idUser, Long idCertificate) {
         try {
             GiftCertificate certificate = certificateRepository.findById(idCertificate).orElseThrow(() ->
                     new NotFoundException("Certificate with id - " + idCertificate + " not found"));
@@ -70,6 +66,8 @@ public class OrderServiceImpl implements OrderService {
 
             orderRepository.save(createOrderWithCertificate(order, certificate, user));
             log.info("Insert order");
+
+            return getById(order.getId());
         }catch (Exception e){
             throw new ServerErrorException("Error with Insert certificate: " + e);
         }
@@ -100,82 +98,30 @@ public class OrderServiceImpl implements OrderService {
      * offset - начало страницы, limit - конец страницы
      * и сортирующий страницу по имени поля и по методу ASC/DESC
      *
-     * @param offset содержит начало страницы
-     * @param limit содержит конец страницы
-     * @param sort лист с обьектами по которым надо сортировать
+     * @param pageable содержит информацию о страницы
      *
      * @return страницу заказов со всей информацией
      */
     @Override
-    public Page<Order> getAll(Integer offset, Integer limit, String sort) {
-        String[] sorting = sort.split(",");
-
-        Page<Order> orders = orderRepository.findAll(
-                PageRequest.of(offset,limit, sortSetting(sorting[0], sorting[1])));
+    public Page<Order> getAll(Pageable pageable) {
+        Page<Order> orders = orderRepository.findAll(pageable);
         if(orders.isEmpty()) throw new NotFoundException("Orders not found");
         log.info("Orders : {}", orders);
 
         return orders;
     }
 
-    /**
-     * Метод который настраивает сортировку по имени поля и по методу ASC/DESC
-     *
-     * @param sortField содержит имя поле
-     * @param sortMethod содержит метод сортировки ASC/DESC
-     *
-     * @return объект сортировки
-     */
-    private Sort sortSetting(String sortField, String sortMethod){
-        if("ASC".equals(sortMethod)) {
-            return Sort.by(Sort.Direction.ASC, sortField);
-        }
-        else {
-            return Sort.by(Sort.Direction.DESC, sortField);
-        }
-    }
-
     @Override
     @Transactional
-    public void update(Order order, User user, GiftCertificate certificate) {
+    public Order update(Order order, User user, GiftCertificate certificate) {
         try {
             orderRepository.save(updateOrderWithCertificate(order, certificate, user));
             log.info("Update order");
+
+            return getById(order.getId());
         }catch (Exception e){
             throw new ServerErrorException("Error with Update certificate: " + e);
         }
-    }
-
-    /**
-     * Метод созданный для обновления заказа с сертификатом
-     *
-     * @param order содержит данные о заказе
-     * @param certificate содержит данные о подарочном сертификате
-     * @param user содержит данные о пользователе
-     *
-     * @return объект заказа со сертификатом
-     */
-    private Order updateOrderWithCertificate(Order order,
-                                             GiftCertificate certificate,
-                                             User user)
-    {
-        GiftCertificate oldCertificate = certificateRepository.getReferenceById(certificate.getId());
-        log.info("Certificate with id " + certificate.getId() + ": {}", certificate);
-        oldCertificate.setName(certificate.getName());
-        oldCertificate.setPrice(certificate.getPrice());
-        oldCertificate.setDuration(certificate.getDuration());
-        oldCertificate.setTags(certificate.getTags());
-
-        User oldUser = userRepository.getReferenceById(user.getId());
-        log.info("User with id " + user.getId() + ": {}", user);
-        oldUser.setEmail(user.getEmail());
-        oldUser.setPassword(user.getPassword());
-
-        Order oldOrder = orderRepository.getReferenceById(order.getId());
-        oldOrder.setUser(oldUser);
-        oldOrder.getCertificates().add(oldCertificate);
-
-        return oldOrder;
     }
 
     /**
@@ -214,5 +160,37 @@ public class OrderServiceImpl implements OrderService {
         log.info("Order with id " + id + ": {}", order);
 
         return order;
+    }
+
+    /**
+     * Метод созданный для обновления заказа с сертификатом
+     *
+     * @param order содержит данные о заказе
+     * @param certificate содержит данные о подарочном сертификате
+     * @param user содержит данные о пользователе
+     *
+     * @return объект заказа со сертификатом
+     */
+    private Order updateOrderWithCertificate(Order order,
+                                             GiftCertificate certificate,
+                                             User user)
+    {
+        GiftCertificate oldCertificate = certificateRepository.getReferenceById(certificate.getId());
+        log.info("Certificate with id " + certificate.getId() + ": {}", certificate);
+        oldCertificate.setName(certificate.getName());
+        oldCertificate.setPrice(certificate.getPrice());
+        oldCertificate.setDuration(certificate.getDuration());
+        oldCertificate.setTags(certificate.getTags());
+
+        User oldUser = userRepository.getReferenceById(user.getId());
+        log.info("User with id " + user.getId() + ": {}", user);
+        oldUser.setEmail(user.getEmail());
+        oldUser.setPassword(user.getPassword());
+
+        Order oldOrder = orderRepository.getReferenceById(order.getId());
+        oldOrder.setUser(oldUser);
+        oldOrder.getCertificates().add(oldCertificate);
+
+        return oldOrder;
     }
 }

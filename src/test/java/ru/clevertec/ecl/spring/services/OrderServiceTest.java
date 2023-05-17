@@ -9,6 +9,9 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import ru.clevertec.ecl.spring.entity.GiftCertificate;
 import ru.clevertec.ecl.spring.entity.Order;
 import ru.clevertec.ecl.spring.entity.User;
@@ -66,7 +69,8 @@ public class OrderServiceTest {
 
     @Test
     public void getAllTest(){
-        Page<Order> orderList = service.getAll(5, 10,"id:DESC");
+        Pageable pageable = PageRequest.of(0, 3, Sort.by("id"));
+        Page<Order> orderList = service.getAll(pageable);
 
         assertThat(orderList.getTotalPages()).isNotEqualTo(0);
     }

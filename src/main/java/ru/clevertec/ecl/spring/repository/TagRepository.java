@@ -9,6 +9,6 @@ import java.util.List;
 
 public interface TagRepository extends JpaRepository<Tag, Long> {
 
-    @Query("FROM Tag WHERE name LIKE % : tagName %")
+    @Query(value = "FROM Tag WHERE name LIKE % ?1 %", nativeQuery = true)
     Tag findByName(String tagName);
 }

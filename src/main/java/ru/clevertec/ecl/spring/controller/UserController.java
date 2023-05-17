@@ -5,7 +5,10 @@ import jakarta.validation.constraints.NotEmpty;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,30 +28,21 @@ import ru.clevertec.ecl.spring.services.UserService;
 @RequiredArgsConstructor
 public class UserController {
 
-    /**
-     * Это поле интерфейса описывающее поведение
-     * сервис обработчика запросов пользователей
-     * @see UserService
-     */
     private final UserService service;
 
     @GetMapping("/{id}")
-    @ResponseStatus(HttpStatus.FOUND)
-    public User getUserById(@PathVariable Long id){
+    public ResponseEntity<User> getUserById(@PathVariable Long id){
         log.info("Find user by id: {}", id);
 
-        return service.getById(id);
+        return new ResponseEntity<>(service.getById(id),HttpStatus.FOUND);
     }
 
     @GetMapping
-    @ResponseStatus(HttpStatus.FOUND)
-    public Page<User> getUsers(
-            @RequestParam(value = "offset", defaultValue = "0") @Min(0) Integer offset,
-            @RequestParam(value = "limit", defaultValue = "10") @Min(1) Integer limit,
-            @RequestParam(value = "sort", defaultValue = "id,ASC")@NotEmpty String sort)
+    public ResponseEntity<Page<User>> getUsers(Pageable pageable)
     {
-        log.info("Get all users with offset: {}, limit: {}, sort: {}", offset, limit, sort);
+        log.info("Get all users with page: {}, size: {}, sort: {}",
+                pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort());
 
-        return service.getAll(offset, limit, sort);
+        return new ResponseEntity<>(service.getAll(pageable),HttpStatus.FOUND);
     }
 }

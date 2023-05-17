@@ -8,6 +8,9 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import ru.clevertec.ecl.spring.entity.Tag;
 import ru.clevertec.ecl.spring.repository.TagRepository;
 import ru.clevertec.ecl.spring.services.impl.TagServiceImpl;
@@ -50,9 +53,10 @@ public class TagServiceTest {
 
     @Test
     public void getAllTest(){
-        Page<Tag> tagList = service.getAll(4, 5, "id:ASC");
+        Pageable pageable = PageRequest.of(0, 3, Sort.by("id"));
+        Page<Tag> tagList = service.getAll(pageable);
 
-        assertThat(tagList.getTotalPages()).isEqualTo(5);
+        assertThat(tagList.getTotalPages()).isEqualTo(3);
     }
 
     @ParameterizedTest

@@ -6,6 +6,9 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import ru.clevertec.ecl.spring.entity.Tag;
 import ru.clevertec.ecl.spring.entity.User;
 import ru.clevertec.ecl.spring.repository.UserRepository;
@@ -26,7 +29,8 @@ public class UserServiceTest {
 
     @Test
     public void getAllTest(){
-        Page<User> userList = service.getAll(4, 5, "id:ASC");
+        Pageable pageable = PageRequest.of(0, 5, Sort.by("id"));
+        Page<User> userList = service.getAll(pageable);
 
         assertThat(userList.getTotalPages()).isEqualTo(5);
     }

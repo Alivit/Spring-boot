@@ -16,6 +16,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.CascadeType;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -37,6 +38,7 @@ import java.util.Set;
 @Table(name = "gift_certificates")
 @Getter
 @Setter
+@Builder
 @ToString
 @EqualsAndHashCode
 @AllArgsConstructor
@@ -105,6 +107,7 @@ public class GiftCertificate {
             inverseForeignKey = @ForeignKey(ConstraintMode.CONSTRAINT))
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
+    @Builder.Default
     private Set<Tag> tags = new HashSet<>();
 
 }
