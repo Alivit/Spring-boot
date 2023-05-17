@@ -1,0 +1,6 @@
+# Spring Boot configuration
+spring:
+  # Database
+  datasource:
+    username: test
+    password: test
